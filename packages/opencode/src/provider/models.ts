@@ -109,4 +109,5 @@ export namespace ModelsDev {
   }
 }
 
-setInterval(() => ModelsDev.refresh(), 60 * 1000 * 60).unref()
+// DISABLED: Periodic fetch to models.dev - use OPENCODE_DISABLE_MODELS_FETCH=true instead
+// setInterval(() => ModelsDev.refresh(), 60 * 1000 * 60).unref()

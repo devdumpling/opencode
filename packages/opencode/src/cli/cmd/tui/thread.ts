@@ -156,9 +156,10 @@ export const TuiThreadCommand = cmd({
       },
     })
 
-    setTimeout(() => {
-      client.call("checkUpgrade", { directory: cwd }).catch(() => {})
-    }, 1000)
+    // DISABLED: Auto-upgrade check makes network calls to GitHub/npm/etc
+    // setTimeout(() => {
+    //   client.call("checkUpgrade", { directory: cwd }).catch(() => {})
+    // }, 1000)
 
     await tuiPromise
   },

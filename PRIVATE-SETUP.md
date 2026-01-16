@@ -37,6 +37,25 @@ Auth tokens are stored in `~/.local/share/opencode/auth.json`
 | `OPENCODE_DISABLE_AUTOUPDATE=true` | Disable auto-update checks | Yes |
 | `OPENCODE_DISABLE_LSP_DOWNLOAD=true` | Disable LSP server downloads | No (keep LSP) |
 
+## Code Changes Made (Telemetry Hardening)
+
+The following changes were made to this fork to disable external network calls:
+
+### 1. Share System Disabled
+**File:** `packages/opencode/src/project/bootstrap.ts`
+- Commented out `Share.init()` and `ShareNext.init()`
+- These sync session data to `api.opencode.ai`
+
+### 2. Models.dev Periodic Refresh Disabled
+**File:** `packages/opencode/src/provider/models.ts`
+- Commented out `setInterval()` that fetches from `models.dev` every 60 minutes
+- Still uses bundled/cached model data
+
+### 3. Auto-Upgrade Check Disabled
+**File:** `packages/opencode/src/cli/cmd/tui/thread.ts`
+- Commented out `checkUpgrade()` call on startup
+- This was calling GitHub/npm APIs even with env var set
+
 ## Running in Any Project
 
 **OpenCode uses your current working directory** (same as Claude Code).
@@ -89,24 +108,37 @@ Create `.opencode/opencode.json` in your target repo:
 
 ## Security Notes
 
-### Network Calls Made
+### Network Calls Made (After Hardening)
 
 | Endpoint | Purpose | Notes |
 |----------|---------|-------|
 | `github.com/login/*` | OAuth authentication | Required for Copilot |
 | `api.githubcopilot.com` | LLM inference | Required for Copilot |
 
-### Disabled by Environment Variables
+### Disabled by Code Changes (This Fork)
 
-- `models.dev/api.json` - Model definitions (uses bundled data instead)
-- `api.github.com/repos/.../releases` - Auto-update checks
+| Endpoint | What It Did | Status |
+|----------|-------------|--------|
+| `api.opencode.ai/share_*` | Session sharing/sync | **Removed** in bootstrap.ts |
+| `api.dev.opencode.ai/*` | Dev share endpoint | **Removed** in bootstrap.ts |
+| `models.dev/api.json` | Model definitions (60min refresh) | **Removed** interval in models.ts |
+| `api.github.com/repos/.../releases` | Auto-update check | **Removed** call in thread.ts |
 
-### Not Present
+### Still Requires Environment Variables
+
+Even with code changes, set these for defense in depth:
+```bash
+export OPENCODE_DISABLE_MODELS_FETCH=true
+export OPENCODE_DISABLE_AUTOUPDATE=true
+```
+
+### Not Present (Verified)
 
 - No Sentry, PostHog, Segment, Amplitude, or Google Analytics
 - No frontend telemetry
 - No feature flags or A/B testing
 - Honeycomb telemetry is server-side only (Zen API), not in local TUI
+- OpenTelemetry is opt-in only (disabled by default)
 
 ## Available Copilot Models
 

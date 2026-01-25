@@ -11,6 +11,8 @@ import { Instance } from "./instance"
 import { Vcs } from "./vcs"
 import { Log } from "@/util/log"
 // DISABLED: import { ShareNext } from "@/share/share-next"
+import { Snapshot } from "../snapshot"
+import { Truncate } from "../tool/truncation"
 
 export async function InstanceBootstrap() {
   Log.Default.info("bootstrapping", { directory: Instance.directory })
@@ -23,6 +25,8 @@ export async function InstanceBootstrap() {
   FileWatcher.init()
   File.init()
   Vcs.init()
+  Snapshot.init()
+  Truncate.init()
 
   Bus.subscribe(Command.Event.Executed, async (payload) => {
     if (payload.properties.name === Command.Default.INIT) {
